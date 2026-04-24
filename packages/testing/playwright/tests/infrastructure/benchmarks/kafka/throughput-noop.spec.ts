@@ -20,7 +20,7 @@ test.describe(
 			const handle = await kafkaDriver.setup({
 				api,
 				services,
-				scenario: { nodeCount: 1, payloadSize: '1KB', nodeOutputSize: 'noop', partitions: 6 },
+				scenario: { nodeCount: 1, payloadSize: '1KB', nodeOutputSize: 'noop', partitions: 3 },
 			});
 			await runThroughputTest({
 				handle,

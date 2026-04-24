@@ -124,6 +124,12 @@ const CI_BENCHMARK_PROFILES: BenchmarkProfile[] = [
 				DB_POSTGRESDB_CONNECTION_TIMEOUT: '60000',
 				N8N_CONCURRENCY_PRODUCTION_LIMIT: '20',
 				EXECUTIONS_DATA_SAVE_ON_SUCCESS: 'none',
+				// Experiment: bump libuv thread pool above the default of 4 to
+				// rule out hidden fs/crypto/DNS/zlib work on main's hot path.
+				// Hypothesis: no effect, since Kafka/PG/Redis are network I/O
+				// (kernel epoll, not threadpool). If it DOES move the needle,
+				// there's threadpool-consuming code somewhere we missed.
+				UV_THREADPOOL_SIZE: '32',
 			},
 		},
 	},
