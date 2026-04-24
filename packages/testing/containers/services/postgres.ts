@@ -43,15 +43,6 @@ export const postgres: Service<PostgresResult> = {
 				'full_page_writes=off',
 				'-c',
 				'max_connections=200',
-				// TEMP: benchmark experiment — bump shared_buffers from default
-				// 128MB to 1GB to test whether buffer pool pressure is the
-				// remaining drift driver once autovacuum is ruled out. Also
-				// adjust effective_cache_size to match so the planner knows the
-				// OS cache is larger. Revert after measurement.
-				'-c',
-				'shared_buffers=1GB',
-				'-c',
-				'effective_cache_size=3GB',
 			])
 			.withReuse()
 			.start();
