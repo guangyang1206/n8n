@@ -36,7 +36,7 @@ jobs:
           # - profile: benchmark-queue-tuned
           #   runner: blacksmith-16vcpu-ubuntu-2204
           - profile: benchmark-direct-tuned
-            runner: blacksmith-16vcpu-ubuntu-2204
+            runner: blacksmith-8vcpu-ubuntu-2204
     uses: ./.github/workflows/test-e2e-reusable.yml
     with:
       test-mode: docker-artifact
