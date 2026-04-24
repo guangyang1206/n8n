@@ -48,7 +48,9 @@ const BENCHMARK_WORKER_COUNT = parseInt(process.env.KAFKA_LOAD_WORKERS ?? '3', 1
 // Resource profiles matching realistic AWS instance types:
 // Main: m5.large (2 vCPU, 8GB RAM) — matches staging main
 // Workers: t3.medium (2 vCPU, 4GB RAM) — matches staging worker limits
-export const BENCHMARK_MAIN_RESOURCES = { memory: 8, cpu: 2 };
+// TEMP: bumped main to 4 CPU for Kafka-trigger ceiling experiment
+// (testing whether single-main Kafka throughput scales with CPU quota).
+export const BENCHMARK_MAIN_RESOURCES = { memory: 8, cpu: 4 };
 export const BENCHMARK_WORKER_RESOURCES = { memory: 4, cpu: 2 };
 
 export const OBSERVABILITY_SERVICES = ['victoriaLogs', 'victoriaMetrics', 'vector'] as const;
