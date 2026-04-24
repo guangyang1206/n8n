@@ -43,11 +43,15 @@ export const postgres: Service<PostgresResult> = {
 				'full_page_writes=off',
 				'-c',
 				'max_connections=200',
-				// TEMP: benchmark experiment — disable autovacuum to test whether it
-				// is the primary driver of sustained-throughput drift on long Kafka
-				// runs. Revert after measurement.
+				// TEMP: benchmark experiment — bump shared_buffers from default
+				// 128MB to 1GB to test whether buffer pool pressure is the
+				// remaining drift driver once autovacuum is ruled out. Also
+				// adjust effective_cache_size to match so the planner knows the
+				// OS cache is larger. Revert after measurement.
 				'-c',
-				'autovacuum=off',
+				'shared_buffers=1GB',
+				'-c',
+				'effective_cache_size=3GB',
 			])
 			.withReuse()
 			.start();
