@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount, flushPromises } from '@vue/test-utils';
 import { nextTick, ref } from 'vue';
-import type { AgentJsonConfigRef } from '../types';
+import type { AgentJsonSkillRef, AgentJsonToolRef } from '../types';
 
 const routerPush = vi.fn();
 const routerReplace = vi.fn();
@@ -88,7 +88,8 @@ vi.mock('../composables/useAgentBuilderTelemetry', () => ({
 interface TestAgentConfig {
 	name: string;
 	instructions: string;
-	tools?: AgentJsonConfigRef[];
+	tools?: AgentJsonToolRef[];
+	skills?: AgentJsonSkillRef[];
 }
 
 const mockConfig = ref<TestAgentConfig | null>({
@@ -566,7 +567,7 @@ describe('AgentBuilderView — three-column shell', () => {
 		intendedConfig = {
 			name: 'Agent One',
 			instructions: 'You are a helpful assistant.',
-			tools: [{ type: 'skill', id: 'summarize_notes' }],
+			skills: [{ type: 'skill', id: 'summarize_notes' }],
 		};
 		mockConfig.value = { ...intendedConfig };
 		getAgentMock.mockResolvedValueOnce(
@@ -594,7 +595,7 @@ describe('AgentBuilderView — three-column shell', () => {
 		expect(skillViewer.props('skill')).toEqual(skill);
 	});
 
-	it('removes an applied skill from the config tools list', async () => {
+	it('removes an applied skill from the config skills list', async () => {
 		const skill = {
 			name: 'summarize_notes',
 			description: 'Use when summarizing notes',
@@ -603,10 +604,8 @@ describe('AgentBuilderView — three-column shell', () => {
 		intendedConfig = {
 			name: 'Agent One',
 			instructions: 'You are a helpful assistant.',
-			tools: [
-				{ type: 'skill', id: 'summarize_notes' },
-				{ type: 'custom', id: 'custom_tool' },
-			],
+			tools: [{ type: 'custom', id: 'custom_tool' }],
+			skills: [{ type: 'skill', id: 'summarize_notes' }],
 		};
 		mockConfig.value = { ...intendedConfig };
 		getAgentMock.mockResolvedValueOnce(
@@ -625,8 +624,11 @@ describe('AgentBuilderView — three-column shell', () => {
 		skillsPanel.vm.$emit('remove-skill', 'summarize_notes');
 		await nextTick();
 
-		const vm = wrapper.vm as unknown as { localConfig: { tools?: AgentJsonConfigRef[] } };
+		const vm = wrapper.vm as unknown as {
+			localConfig: { tools?: AgentJsonToolRef[]; skills?: AgentJsonSkillRef[] };
+		};
 		expect(vm.localConfig.tools).toEqual([{ type: 'custom', id: 'custom_tool' }]);
+		expect(vm.localConfig.skills).toEqual([]);
 		expect(wrapper.findComponent({ name: 'AgentSkillsListPanel' }).props('skills')).toEqual([]);
 	});
 
@@ -669,11 +671,11 @@ describe('AgentBuilderView — three-column shell', () => {
 		modalData.onConfirm({ id: 'summarize_meetings', skill });
 		await nextTick();
 
-		const vm = wrapper.vm as unknown as { localConfig: { tools?: AgentJsonConfigRef[] } };
-		expect(vm.localConfig.tools).toEqual([
-			{ type: 'custom', id: 'custom_tool' },
-			{ type: 'skill', id: 'summarize_meetings' },
-		]);
+		const vm = wrapper.vm as unknown as {
+			localConfig: { tools?: AgentJsonToolRef[]; skills?: AgentJsonSkillRef[] };
+		};
+		expect(vm.localConfig.tools).toEqual([{ type: 'custom', id: 'custom_tool' }]);
+		expect(vm.localConfig.skills).toEqual([{ type: 'skill', id: 'summarize_meetings' }]);
 		expect(wrapper.findComponent({ name: 'AgentSkillViewer' }).props('skill')).toEqual(skill);
 	});
 
@@ -692,7 +694,7 @@ describe('AgentBuilderView — three-column shell', () => {
 		intendedConfig = {
 			name: 'Agent One',
 			instructions: 'You are a helpful assistant.',
-			tools: [{ type: 'skill', id: 'summarize_notes' }],
+			skills: [{ type: 'skill', id: 'summarize_notes' }],
 		};
 		mockConfig.value = { ...intendedConfig };
 		getAgentMock.mockResolvedValueOnce(
