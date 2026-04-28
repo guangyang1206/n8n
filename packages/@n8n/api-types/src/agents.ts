@@ -113,7 +113,7 @@ export interface NodeToolConfig {
 }
 
 export interface AgentJsonToolRef {
-	type: 'custom' | 'workflow' | 'node' | 'skill';
+	type: 'custom' | 'workflow' | 'node';
 	id?: string;
 	workflow?: string;
 	name?: string;
@@ -123,6 +123,13 @@ export interface AgentJsonToolRef {
 	requireApproval?: boolean;
 	allOutputs?: boolean;
 }
+
+export interface AgentJsonSkillRef {
+	type: 'skill';
+	id: string;
+}
+
+export type AgentJsonConfigRef = AgentJsonToolRef | AgentJsonSkillRef;
 
 export interface AgentSkill {
 	name: string;
@@ -150,7 +157,7 @@ export interface AgentJsonConfig {
 			embedder?: string;
 		};
 	};
-	tools?: AgentJsonToolRef[];
+	tools?: AgentJsonConfigRef[];
 	providerTools?: Record<string, Record<string, unknown>>;
 	config?: {
 		thinking?: {
