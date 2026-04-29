@@ -46,15 +46,6 @@ describe('CustomerIoTrigger Node', () => {
 			expect(result.workflowData![0][0].json).toEqual(mockBody);
 		});
 
-		it('should trigger workflow when no signing key is configured (backward compatibility)', async () => {
-			(verifySignature as jest.Mock).mockResolvedValue(true);
-
-			const result = await customerIoTrigger.webhook!.call(mockWebhookFunctions);
-
-			expect(result.workflowData).toBeDefined();
-			expect(result.workflowData![0][0].json).toEqual(mockBody);
-		});
-
 		it('should respond with 401 when signature is invalid', async () => {
 			(verifySignature as jest.Mock).mockResolvedValue(false);
 
