@@ -57,6 +57,15 @@ export class CustomerIoApi implements ICredentialType {
 			default: '',
 			description: 'Required for App API',
 		},
+		{
+			displayName: 'Webhook Signing Key',
+			name: 'webhookSigningKey',
+			type: 'string',
+			typeOptions: { password: true },
+			default: '',
+			description:
+				'Used to verify the authenticity of Reporting Webhook requests. Find it in your Customer.io dashboard under Integrations > Reporting webhooks.',
+		},
 	];
 
 	async authenticate(
