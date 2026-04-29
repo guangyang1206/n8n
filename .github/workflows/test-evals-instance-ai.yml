@@ -28,7 +28,7 @@ jobs:
   run-evals:
     name: 'Run Evals'
     runs-on: blacksmith-4vcpu-ubuntu-2204
-    timeout-minutes: 45
+    timeout-minutes: 60
     permissions:
       contents: read
       pull-requests: write
