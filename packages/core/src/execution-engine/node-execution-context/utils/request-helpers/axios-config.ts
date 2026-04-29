@@ -1,7 +1,7 @@
 import { AiConfig } from '@n8n/config';
 import { Container } from '@n8n/di';
 import type { AxiosRequestConfig } from 'axios';
-import axios from 'axios';
+import axios, { AxiosHeaders } from 'axios';
 import { stringify } from 'qs';
 
 import { setAxiosAgents } from './axios-utils';
@@ -25,22 +25,26 @@ axios.defaults.proxy = false;
 
 // Interceptor (side effect)
 axios.interceptors.request.use((config) => {
-	// If no content-type is set by us, prevent axios from force-setting the content-type to `application/x-www-form-urlencoded`
+	setAxiosAgents(config);
+	applyVendorHeaders(config);
+
+	// If no content-type is set by us, prevent axios from force-setting the content-type to
+	// `application/x-www-form-urlencoded`. Run this AFTER applyVendorHeaders so that
+	// config.headers is guaranteed to be an AxiosHeaders instance (not a plain object).
 	if (config.data === undefined) {
 		config.headers.setContentType(false, false);
 	}
-
-	setAxiosAgents(config);
-	applyVendorHeaders(config);
 
 	return config;
 });
 
 function applyVendorHeaders(config: AxiosRequestConfig) {
 	if ([config.url, config.baseURL].some((url) => url?.startsWith('https://api.openai.com/'))) {
-		config.headers = {
+		// Merge vendor headers while preserving the AxiosHeaders instance so that
+		// methods like setContentType() remain available to the interceptor chain.
+		config.headers = new AxiosHeaders({
 			...Container.get(AiConfig).openAiDefaultHeaders,
 			...(config.headers ?? {}),
-		};
+		});
 	}
 }
