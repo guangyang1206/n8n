@@ -739,6 +739,16 @@ interface RefreshOAuth2TokenContext {
 	logger: WorkflowLogger;
 }
 
+async function maybeDecryptOAuth2TokenData<T extends Record<string, unknown> | undefined>(
+	additionalData: IWorkflowExecuteAdditionalData,
+	tokenData: T,
+	jweEnabled: boolean,
+): Promise<T | IDataObject> {
+	const proxy = additionalData['oauth-jwe']?.oauthJweProxyProvider;
+	if (!proxy) return tokenData;
+	return await proxy.decryptOAuth2TokenData(tokenData as unknown as IDataObject, { jweEnabled });
+}
+
 async function refreshOrFetchToken(ctx: RefreshOAuth2TokenContext): Promise<ClientOAuth2Token> {
 	const { credentials, token, credentialsType, node, additionalData, oAuth2Options, logger } = ctx;
 	const tokenRefreshOptions: IDataObject = {};
@@ -768,7 +778,13 @@ async function refreshOrFetchToken(ctx: RefreshOAuth2TokenContext): Promise<Clie
 		`OAuth2 token for "${credentialsType}" used by node "${node.name}" has been renewed.`,
 	);
 
-	credentials.oauthTokenData = newToken.data;
+	const refreshedTokenData = await maybeDecryptOAuth2TokenData(
+		additionalData,
+		newToken.data,
+		credentials.jweEnabled === true,
+	);
+
+	credentials.oauthTokenData = refreshedTokenData as typeof credentials.oauthTokenData;
 	if (!node.credentials?.[credentialsType]) {
 		throw new ApplicationError('Node does not have credential type', {
 			extra: { nodeName: node.name, credentialType: credentialsType },
@@ -843,7 +859,12 @@ export async function requestOAuth2(
 		}
 
 		const nodeCredentials = node.credentials[credentialsType];
-		credentials.oauthTokenData = data;
+		const initialTokenData = (await maybeDecryptOAuth2TokenData(
+			additionalData,
+			data,
+			credentials.jweEnabled === true,
+		)) as ClientOAuth2TokenData;
+		credentials.oauthTokenData = initialTokenData;
 
 		// Save the refreshed token
 		await additionalData.credentialsHelper.updateCredentialsOauthTokenData(
@@ -853,7 +874,7 @@ export async function requestOAuth2(
 			additionalData,
 		);
 
-		oauthTokenData = data;
+		oauthTokenData = initialTokenData;
 	}
 
 	const accessToken =
