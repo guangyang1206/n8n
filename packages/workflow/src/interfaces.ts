@@ -1060,10 +1060,7 @@ export type CredentialCheckProxyFunctions = {
 };
 
 export type OauthJweProxyProvider = {
-	decryptOAuth2TokenData(
-		tokenData: IDataObject,
-		opts: { jweEnabled: boolean },
-	): Promise<IDataObject>;
+	decryptOAuth2TokenData(tokenData: IDataObject): Promise<IDataObject>;
 };
 
 type BaseExecutionFunctions = FunctionsBaseWithRequiredKeys<'getMode'> & {
